@@ -34,75 +34,36 @@ emoji_options = {
     "🎉": "Excited"
 }
 
-# Initialize a dictionary to track selections
+# Initialize a dictionary to track the selection
 if "emoji_selections" not in st.session_state:
-    st.session_state.emoji_selections = {emoji: False for emoji in emoji_options}
+    st.session_state.emoji_selections = None  # Only one selection allowed
 
-# Inject custom CSS for a grid layout
-st.markdown(
-    """
-    <style>
-    .emoji-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 10px;
-        margin: 20px 0;
-    }
-    .emoji-item {
-        display: flex;
-        align-items: center;
-        padding: 5px;
-        border: 1px solid lightgray;
-        border-radius: 8px;
-        transition: background-color 0.3s ease;
-    }
-    .emoji-item:hover {
-        background-color: #f0f8ff;
-    }
-    .emoji-label {
-        margin-left: 10px;
-        font-size: 16px;
-        font-weight: bold;
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
+# Render the radio button group for emoji selection (only one can be selected)
+selected_emoji = st.radio(
+    "Select your mood:",
+    options=[(emoji, description) for emoji, description in emoji_options.items()],
+    format_func=lambda x: f"{x[0]} - {x[1]}",  # Format the display as emoji and description
+    key="emoji_selection"
 )
-
-# Render checkboxes in a three-column grid
-st.markdown('<div class="emoji-grid">', unsafe_allow_html=True)
-for emoji, description in emoji_options.items():
-    # Render each emoji with a checkbox
-    selected = st.checkbox(f"{emoji} {description}", key=f"emoji_{emoji}")
-    st.session_state.emoji_selections[emoji] = selected
-st.markdown('</div>', unsafe_allow_html=True)
 
 # Submit button to finalize selection
 if st.button("Submit"):
-    selected_emojis = [
-        (emoji, emoji_options[emoji])
-        for emoji, selected in st.session_state.emoji_selections.items()
-        if selected
-    ]
+    if selected_emoji:
+        # Combine the selected emoji with the description
+        selected_emoji_emoji, selected_emoji_description = selected_emoji
+        mood_summary = f"{selected_emoji_emoji} ({selected_emoji_description})"
+        user_input = f"My current mood is: {mood_summary}."
 
-    if selected_emojis:
-        # Display
-        # st.write("You selected the following moods:")
-        # for emoji, description in selected_emojis:
-        #     st.write(f"{emoji} - {description}")
+        # Append user input to chat history (if needed)
+        # st.session_state.messages.append({"role": "user", "content": user_input})
 
-        # Combine selections into a single string for the assistant
-        mood_summary = ", ".join([f"{emoji} ({description})" for emoji, description in selected_emojis])
-        user_input = f"My current moods are: {mood_summary}."
+        # Reset emoji selection
+        st.session_state.emoji_selections = None
 
-        # Append user input to chat history
-        st.session_state.messages.append({"role": "user", "content": user_input})
-
-        # Reset emoji selections
-        st.session_state.emoji_selections = {emoji: False for emoji in emoji_options}
-
+        # Optionally, display the selected mood
+        st.write(f"You selected: {mood_summary}")
     else:
-        st.warning("Please select at least one mood before submitting!")
+        st.warning("Please select a mood before submitting!")
 
 # Greetings
 with st.chat_message("assistant"):
@@ -114,34 +75,70 @@ for message in st.session_state.messages:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-# React to user input
+# Function to generate GPT response
+def generate_gpt_response(messages):
+    """
+    Generates a GPT response based on the current chat history.
+    Appends the response to the chat and displays it in the UI.
+    """
+    with st.chat_message("assistant"):
+        # Placeholder for the response
+        message_placeholder = st.empty()
+        full_response = ""
+
+        # Call the API with the current messages
+        for response in openai.chat.completions.create(
+            model=st.session_state["openai_model"],
+            messages=[
+                {"role":m["role"],"content":m["content"]}
+                for m in st.session_state.messages
+            ],
+            # slowly get gpt response to simulate typing effect
+            stream=True,
+        ):
+            # show the response with typing effect in the window
+            delta_content = response.choices[0].delta.content
+            if delta_content is not None:
+                full_response += delta_content
+                message_placeholder.markdown(full_response + "┃")
+
+        # Finalize the response display
+        message_placeholder.markdown(full_response)
+
+    # Add the assistant's response to the session state
+    st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    if message["role"] != "system":  # Exclude the system message from display
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+# React to user input from chat_input
 if prompt := st.chat_input("How's your day?"):
-    
     # Display user message in chat container
     with st.chat_message("user"):
         st.markdown(prompt)
-    # Add user message to chat history
+
+    # Add user input to the session state
     st.session_state.messages.append({"role": "user", "content": prompt})
 
-    # Generate GPT response
-    with st.chat_message("assistant"):
-        # Variables for building the response
-        message_placeholder = st.empty()
-        full_response = ""
-        
-        # Call the API in real-time
-        for response in openai.chat.completions.create(
-            model=st.session_state["openai_model"],
-            messages=st.session_state.messages,
-            # Stream GPT response to simulate typing effect
-            stream=True,
-        ):
-            delta_content = response.choices[0].delta.content
-            if delta_content:
-                full_response += delta_content
-                message_placeholder.markdown(full_response + "┃")
-        
-        # Show the response one more time without the typing effect
-        message_placeholder.markdown(full_response)
-    # Add GPT response to message history
-    st.session_state.messages.append({"role": "assistant", "content": full_response})
+    # Generate GPT response for user input
+    generate_gpt_response(st.session_state.messages)
+
+# Add the "Generate To-do" button in the sidebar
+with st.sidebar:
+    st.markdown("### Quick Tools")
+    st.write("If you want to generate the a potential to-do list, please press this button.")
+    if st.button("Generate To-do"):
+        auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
+
+        # Display the auto-prompt in chat
+        with st.chat_message("user"):
+            st.markdown(auto_prompt)
+
+        # Add auto-prompt to message history
+        st.session_state.messages.append({"role": "user", "content": auto_prompt})
+
+        # Generate GPT response for auto-prompt
+        generate_gpt_response(st.session_state.messages)
