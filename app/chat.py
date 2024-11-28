@@ -5,6 +5,7 @@
 
 import openai
 import streamlit as st
+from datetime import datetime
 
 st.set_option("client.showSidebarNavigation", False)
 
@@ -147,12 +148,52 @@ with st.sidebar:
         # st.switch_page("todo.py")
         auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
 
-        # Display the auto-prompt in chat
-        with st.chat_message("user"):
-            st.markdown(auto_prompt)
+        # # Display the auto-prompt in chat
+        # with st.chat_message("user"):
+        #     st.markdown(auto_prompt)
 
-        # Add auto-prompt to message history
-        st.session_state.messages.append({"role": "user", "content": auto_prompt})
+        # # Add auto-prompt to message history
+        # st.session_state.messages.append({"role": "user", "content": auto_prompt})
 
         # Generate GPT response for auto-prompt
-        generate_gpt_response(st.session_state.messages)
+        gpt_response = generate_gpt_response(st.session_state.messages)
+        if "to_do_list" not in st.session_state:
+            st.session_state.to_do_list = ""  # Initialize if not already in session state
+        st.session_state.to_do = gpt_response
+        st.switch_page("pages/todo.py")
+        
+    with st.popover("End Chat"):
+        if st.button("Save in Calendar"):
+            # Generate a summary of the chat using GPT
+            chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
+            summary_prompt = f"Summarize the users' events and feelings in few sentences to capture key emotions and themes:\n\n{chat_history}"
+            
+            # Call OpenAI API to get the summary
+            try:
+                response = openai.chat.completions.create(
+                    model=st.session_state["openai_model"],
+                    messages=[
+                        {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection."},
+                        {"role": "user", "content": summary_prompt}
+                    ]
+                )
+                summary = response.choices[0].message.content
+                # summary = response["choices"][0]["message"]["content"]
+            except Exception as e:
+                st.error(f"Error generating summary: {e}")
+                summary = "Error: Could not generate summary."
+            # Save the summary with today's date in session state
+            today_date = datetime.now().strftime("%Y-%m-%d")
+            st.session_state.chat_summary = {"date": today_date, "summary": summary, "emotions": selected_emoji}
+            # # Display the saved summary to the user
+            # st.write(f"### Chat Summary for {today_date}")
+            # st.markdown(summary)
+            # st.success("Chat summary has been saved.")
+            
+            # Disable chatbot
+            st.session_state.messages = []  # Clear chat history
+            # st.session_state.chat_disabled = True
+            st.rerun()
+        if st.button("Discard Chat"):
+            st.session_state.messages = []  # Clear chat history
+            st.rerun()
