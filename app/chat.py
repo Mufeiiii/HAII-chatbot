@@ -6,6 +6,7 @@
 import openai
 import streamlit as st
 from datetime import datetime
+from prompt import REFLECTION_MEMORY
 
 st.set_option("client.showSidebarNavigation", False)
 
@@ -31,7 +32,7 @@ if "openai_model" not in st.session_state:
 if "messages" not in st.session_state:
     # Implicit system prompt guiding GPT on tone and response style
     st.session_state.messages = [
-        {"role": "system", "content": "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."}
+        {"role": "system", "content": REFLECTION_MEMORY}
     ]
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []

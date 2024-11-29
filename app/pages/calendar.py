@@ -22,7 +22,7 @@ mode = "list"
 
 events = [
     {
-        "title": "Event 1",
+        "title": "Event 1 \n haha",
         # "allDay" : false,
         "color": "#FF6C6C",
         "start": "2024-07-03",
@@ -89,6 +89,10 @@ state = calendar(
     .fc-toolbar-title {
         font-size: 2rem;
     }
+    .fc-event-title {
+        white-space: break-spaces;
+    }
+}
     """,
     key=mode,
 )

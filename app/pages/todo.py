@@ -1,6 +1,7 @@
 import streamlit as st
 import openai
 from datetime import datetime
+from prompt import CBPT_MEMORY
 
 # if "to_do" in st.session_state:
 #     st.write(st.session_state.to_do)
@@ -8,8 +9,10 @@ from datetime import datetime
 # Initialize chat history and implicit system prompt
 if "messages" not in st.session_state:
     # Implicit system prompt guiding GPT on tone and response style
+    prev_prompt = "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."
+    CBPT_final = prev_prompt + CBPT_MEMORY
     st.session_state.messages = [
-        {"role": "system", "content": "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."}
+        {"role": "system", "content": prev_prompt + CBPT_MEMORY}
     ]
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
@@ -67,17 +70,19 @@ def generate_gpt_response(messages):
         message_placeholder = st.empty()
         full_response = ""
 
+        # Add CBPT_MEMORY as a system message to guide GPT's responses
+        messages_with_cbpt = [
+            {"role": "system", "content": CBPT_MEMORY},  # Add CBPT memory
+        ] + [{"role": m["role"], "content": m["content"]} for m in st.session_state.messages]
+
         # Call the API with the current messages
         for response in openai.chat.completions.create(
             model=st.session_state["openai_model"],
-            messages=[
-                {"role":m["role"],"content":m["content"]}
-                for m in st.session_state.messages
-            ],
+            messages=messages_with_cbpt,
             # slowly get gpt response to simulate typing effect
             stream=True,
         ):
-            # show the response with typing effect in the window
+            # Show the response with typing effect in the window
             delta_content = response.choices[0].delta.content
             if delta_content is not None:
                 full_response += delta_content
