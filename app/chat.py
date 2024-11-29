@@ -165,7 +165,8 @@ def button_op():
                 summary = "Error: Could not generate summary."
             # Save the summary with today's date in session state
             today_date = datetime.now().strftime("%Y-%m-%d")
-            st.session_state.chat_summary.append({"date": today_date, "summary": summary, "emotions": selected_emoji, "to-do": ""})
+            current_time = datetime.now().strftime("%H:%M") 
+            st.session_state.chat_summary.append({"date": today_date, "time": current_time, "summary": summary, "emotions": selected_emoji, "to-do": ""})
             # # Display the saved summary to the user
             # st.write(f"### Chat Summary for {today_date}")
             # st.markdown(summary)

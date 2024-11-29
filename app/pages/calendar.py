@@ -15,27 +15,88 @@ from menu import menu
 
 menu()
 
+custom_css = """
+/* Hide the dot for events with the 'no-dot' class */
+.fc-event.no-dot .fc-event-dot {
+    display: none !important; /* Use !important to override default styles */
+}
+
+/* Add the red dot for events with the 'red-dot' class */
+.fc-event.red-dot .fc-event-dot {
+    display: inline-block; /* Ensure dot is shown */
+}
+
+/* Hide all-day labels in list views */
+.fc-list-event-time {
+    display: none;
+}
+
+/* Customize the event title */
+.fc-list-event-title {
+    font-weight: regular;
+    color: #333;
+}
+
+/* Adjust the toolbar title size */
+.fc-toolbar-title {
+    font-size: 1.5rem;
+}
+
+/* Add custom event styling */
+.fc-event {
+    background-color: #FFFFFF;
+    border-radius: 5px;
+    padding: 5px;
+}
+
+"""
+
+# /* Hide the red dot in front of events */
+# .fc-list-event-dot {
+#     display: none;
+# }
+
+
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
 
 mode = "list"
 
+example_string = [
+    "Emotions: 😊",
+    "Summary: The user expressed feeling overwhelmed with a lot of homework to do. They received support and encouragement to take breaks, prioritize tasks, and believe in their ability to tackle their workload. The key emotions and themes are stress, determination, support, and resilience.",
+    "To-Do: 'Be patient'"
+]
+
 events = [
     {
-        "title": "Event 1",
-        # "allDay" : false,
+        "title": example_string[0],
+        "allDay" : True,
+        "description": "haha",
         "color": "#FF6C6C",
         "start": "2024-07-03",
         "end": "2024-07-03",
         "resourceId": "a",
     },
     {
-        "title": "Event 2",
-        "color": "#FFBD45",
-        "start": "2024-08-01",
-        "end": "2024-08-01",
-        "resourceId": "b",
+        "title": example_string[1],
+        "allDay" : True,
+        "description": "haha",
+        "color": "#FFFFFF",
+        "start": "2024-07-03",
+        "end": "2024-07-03",
+        "resourceId": "a",
     },
+    {
+        "title": example_string[2],
+        "allDay" : True,
+        "description": "haha",
+        "color": "#FFFFFF",
+        "start": "2024-07-03",
+        "end": "2024-07-03",
+        "resourceId": "a",
+    },
+
     {
         "title": "Event 3",
         "color": "#FF4B4B",
@@ -76,20 +137,7 @@ calendar_options = {
 state = calendar(
     events=st.session_state.get("events", events),
     options=calendar_options,
-    custom_css="""
-    .fc-event-past {
-        opacity: 0.8;
-    }
-    .fc-event-time {
-        font-style: italic;
-    }
-    .fc-event-title {
-        font-weight: 700;
-    }
-    .fc-toolbar-title {
-        font-size: 2rem;
-    }
-    """,
+    custom_css=custom_css,
     key=mode,
 )
 
@@ -100,4 +148,7 @@ if state.get("eventsSet") is not None:
 
 # st.markdown("## API reference")
 # st.help(calendar)
+
+
+
 st.write(st.session_state.chat_summary)

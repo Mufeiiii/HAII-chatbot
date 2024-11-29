@@ -40,7 +40,8 @@ def button_op():
                 summary = "Error: Could not generate summary."
             # Save the summary with today's date in session state
             today_date = datetime.now().strftime("%Y-%m-%d")
-            st.session_state.chat_summary.append({"date": today_date, "summary": summary, 
+            current_time = datetime.now().strftime("%H:%M") 
+            st.session_state.chat_summary.append({"date": today_date, "time": current_time, "summary": summary, 
                                                      "emotions": st.session_state.emoji_selections, 
                                                      "to-do": st.session_state.to_do})
             # # Display the saved summary to the user

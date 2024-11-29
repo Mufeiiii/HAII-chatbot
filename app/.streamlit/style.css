@@ -1,0 +1,7 @@
+/* styles.css */
+.fc-daygrid-all-day .fc-col-header-cell {
+    display: none;
+}
+.fc-timegrid-all-day {
+    display: none;
+}
