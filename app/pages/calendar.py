@@ -15,6 +15,9 @@ from menu import menu
 
 menu()
 
+if "chat_summary" not in st.session_state:
+    st.session_state.chat_summary = []
+
 mode = "list"
 
 events = [
@@ -97,3 +100,4 @@ if state.get("eventsSet") is not None:
 
 # st.markdown("## API reference")
 # st.help(calendar)
+st.write(st.session_state.chat_summary)

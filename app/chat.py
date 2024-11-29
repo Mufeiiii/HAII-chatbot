@@ -33,7 +33,8 @@ if "messages" not in st.session_state:
     st.session_state.messages = [
         {"role": "system", "content": "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."}
     ]
-
+if "chat_summary" not in st.session_state:
+    st.session_state.chat_summary = []
 
 # Emoji selection
 st.write("How are you feeling right now? Select an emoji that resonates with your mood:")
@@ -59,6 +60,7 @@ selected_emoji = st.radio(
     format_func=lambda x: f"{x[0]} - {x[1]}",  # Format the display as emoji and description
     key="emoji_selection"
 )
+st.session_state.emoji_selections = "emoji_selections"
 
 # Submit button to finalize selection
 if st.button("Submit"):
@@ -140,28 +142,7 @@ if prompt := st.chat_input("How's your day?"):
     # Generate GPT response for user input
     generate_gpt_response(st.session_state.messages)
 
-# Add the "Generate To-do" button in the sidebar
-with st.sidebar:
-    st.markdown("### Quick Tools")
-    st.write("If you want to generate the a potential to-do list, please press this button.")
-    if st.button("Generate To-do"):
-        # st.switch_page("todo.py")
-        auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
-
-        # # Display the auto-prompt in chat
-        # with st.chat_message("user"):
-        #     st.markdown(auto_prompt)
-
-        # # Add auto-prompt to message history
-        # st.session_state.messages.append({"role": "user", "content": auto_prompt})
-
-        # Generate GPT response for auto-prompt
-        gpt_response = generate_gpt_response(st.session_state.messages)
-        if "to_do_list" not in st.session_state:
-            st.session_state.to_do_list = ""  # Initialize if not already in session state
-        st.session_state.to_do = gpt_response
-        st.switch_page("pages/todo.py")
-        
+def button_op():
     with st.popover("End Chat"):
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
@@ -184,7 +165,7 @@ with st.sidebar:
                 summary = "Error: Could not generate summary."
             # Save the summary with today's date in session state
             today_date = datetime.now().strftime("%Y-%m-%d")
-            st.session_state.chat_summary = {"date": today_date, "summary": summary, "emotions": selected_emoji}
+            st.session_state.chat_summary.append({"date": today_date, "summary": summary, "emotions": selected_emoji, "to-do": ""})
             # # Display the saved summary to the user
             # st.write(f"### Chat Summary for {today_date}")
             # st.markdown(summary)
@@ -193,7 +174,21 @@ with st.sidebar:
             # Disable chatbot
             st.session_state.messages = []  # Clear chat history
             # st.session_state.chat_disabled = True
+            st.switch_page("pages/calendar.py")
             st.rerun()
         if st.button("Discard Chat"):
             st.session_state.messages = []  # Clear chat history
             st.rerun()
+
+
+# Add the "Generate To-do" button in the sidebar
+with st.sidebar:
+    st.markdown("### Quick Tools")
+    st.write("If you want to generate the a potential to-do list, please press this button.")
+    if st.button("Generate To-do"):
+        st.switch_page("pages/todo.py")
+        
+    button_op()
+
+st.write(st.session_state.chat_summary)
+            
