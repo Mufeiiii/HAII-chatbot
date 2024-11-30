@@ -15,6 +15,9 @@ from menu import menu
 
 menu()
 
+if "chat_summary" not in st.session_state:
+    st.session_state.chat_summary = []
+
 custom_css = """
 /* Hide the dot for events with the 'no-dot' class */
 .fc-event.no-dot .fc-event-dot {
@@ -68,74 +71,63 @@ example_string = [
     "To-Do: 'Be patient'"
 ]
 
-events = [
-    {
-        "title": example_string[0],
-        "allDay" : True,
-        "description": "haha",
-        "color": "#FF6C6C",
-        "start": "2024-07-03",
-        "end": "2024-07-03",
-        "resourceId": "a",
-    },
-    {
-        "title": example_string[1],
-        "allDay" : True,
-        "description": "haha",
-        "color": "#FFFFFF",
-        "start": "2024-07-03",
-        "end": "2024-07-03",
-        "resourceId": "a",
-    },
-    {
-        "title": example_string[2],
-        "allDay" : True,
-        "description": "haha",
-        "color": "#FFFFFF",
-        "start": "2024-07-03",
-        "end": "2024-07-03",
-        "resourceId": "a",
-    },
+if "events" not in st.session_state:
+    st.session_state.events = []
 
-    {
-        "title": "Event 3",
-        "color": "#FF4B4B",
-        "start": "2024-07-20",
-        "end": "2024-07-20",
-        "resourceId": "c",
-    },
-    {
-        "title": "Event 4",
+st.session_state.events = [
+        {
+            "title": "Event 3",
+            "color": "#FF4B4B",
+            "start": "2024-07-20",
+            "end": "2024-07-20",
+            "resourceId": "c",
+        },
+        {
+            "title": "Event 4",
+            "color": "#FF6C6C",
+            "start": "2024-07-23",
+            "end": "2024-07-23",
+            "resourceId": "d",
+        },
+    ]
+
+for index, chat in enumerate(st.session_state.chat_summary):
+    st.session_state["events"].append({
+        "title": chat["emotions"][0]+" "+ chat["emotions"][1]+", "+chat["time"],
         "color": "#FF6C6C",
-        "start": "2024-07-23",
-        "end": "2024-07-23",
-        "resourceId": "d",
-    },
-]
-calendar_resources = [
-    {"id": "a", "building": "Building A", "title": "Room A"},
-    {"id": "b", "building": "Building A", "title": "Room B"},
-    {"id": "c", "building": "Building B", "title": "Room C"},
-    {"id": "d", "building": "Building B", "title": "Room D"},
-    {"id": "e", "building": "Building C", "title": "Room E"},
-    {"id": "f", "building": "Building C", "title": "Room F"},
-]
+        "start": chat["date"]+"T"+chat["time"]+chat["second"],
+    })
+    st.session_state["events"].append({
+        "title": "Chat Summary: " + chat["summary"],
+        "color": "#FFFFFF",
+        "start": chat["date"]+"T"+chat["time"]+chat["second"],
+
+    })
+    if chat["to-do"]!="": 
+        st.session_state["events"].append({
+            "title": "Your To-Do List: "+ chat["to-do"],
+            "color": "#FFFFFF",
+            "start": chat["date"]+"T"+chat["time"]+chat["second"],
+        })
+
+st.session_state["events"].sort(key=lambda x: x.get("order", 0))
+
 
 calendar_options = {
     "editable": "true",
     "navLinks": "true",
-    "resources": calendar_resources,
+    # "resources": calendar_resources,
     "selectable": "true",
 }
 
 calendar_options = {
     **calendar_options,
-    "initialDate": "2024-07-01",
+    "initialDate": "2024-10-01",
     "initialView": "listMonth",
 }
 
 state = calendar(
-    events=st.session_state.get("events", events),
+    events=st.session_state.events,
     options=calendar_options,
     custom_css=custom_css,
     key=mode,

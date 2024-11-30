@@ -60,7 +60,7 @@ selected_emoji = st.radio(
     format_func=lambda x: f"{x[0]} - {x[1]}",  # Format the display as emoji and description
     key="emoji_selection"
 )
-st.session_state.emoji_selections = "emoji_selections"
+st.session_state.emoji_selections = selected_emoji
 
 # Submit button to finalize selection
 if st.button("Submit"):
@@ -166,7 +166,8 @@ def button_op():
             # Save the summary with today's date in session state
             today_date = datetime.now().strftime("%Y-%m-%d")
             current_time = datetime.now().strftime("%H:%M") 
-            st.session_state.chat_summary.append({"date": today_date, "time": current_time, "summary": summary, "emotions": selected_emoji, "to-do": ""})
+            second = datetime.now().strftime(":%S") 
+            st.session_state.chat_summary.append({"second": second, "date": today_date, "time": current_time, "summary": summary, "emotions": selected_emoji, "to-do": ""})
             # # Display the saved summary to the user
             # st.write(f"### Chat Summary for {today_date}")
             # st.markdown(summary)

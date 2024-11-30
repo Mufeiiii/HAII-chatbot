@@ -41,7 +41,8 @@ def button_op():
             # Save the summary with today's date in session state
             today_date = datetime.now().strftime("%Y-%m-%d")
             current_time = datetime.now().strftime("%H:%M") 
-            st.session_state.chat_summary.append({"date": today_date, "time": current_time, "summary": summary, 
+            second = datetime.now().strftime(":%S") 
+            st.session_state.chat_summary.append({"second": second, "date": today_date, "time": current_time, "summary": summary, 
                                                      "emotions": st.session_state.emoji_selections, 
                                                      "to-do": st.session_state.to_do})
             # # Display the saved summary to the user
