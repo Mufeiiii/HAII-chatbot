@@ -2,6 +2,7 @@ import streamlit as st
 import openai
 from datetime import datetime
 from prompt import CBPT_MEMORY
+from prompt import advice_prompt
 
 # if "to_do" in st.session_state:
 #     st.write(st.session_state.to_do)
@@ -9,11 +10,16 @@ from prompt import CBPT_MEMORY
 # Initialize chat history and implicit system prompt
 if "messages" not in st.session_state:
     # Implicit system prompt guiding GPT on tone and response style
-    prev_prompt = "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."
-    CBPT_final = prev_prompt + CBPT_MEMORY
     st.session_state.messages = [
-        {"role": "system", "content": prev_prompt + CBPT_MEMORY}
+        {"role": "system", "content": []}
     ]
+
+prev_prompt = "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."
+CBPT_final = prev_prompt + CBPT_MEMORY
+st.session_state.messages = [
+    {"role": "system", "content": prev_prompt + CBPT_MEMORY}
+]
+
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
 if "emoji_selections" not in st.session_state:
@@ -132,14 +138,17 @@ with st.sidebar:
     st.write("If you want to generate the a potential to-do list, please press this button.")
     if st.button("Re-generate To-do"):
         # st.switch_page("todo.py")
-        auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
+        user_input = "Can you help me generate a to-do list for targeting this issue?"
 
         # Display the auto-prompt in chat
         # with st.chat_message("user"):
         #     st.markdown(auto_prompt)
 
         # Add auto-prompt to message history
-        st.session_state.messages.append({"role": "user", "content": auto_prompt})
+        
+        st.session_state.messages.append({"role": "user", "content": user_input})
+        st.session_state.messages.append( {"role": "assistant", "content": advice_prompt})
+
 
         # Generate GPT response for auto-prompt
         new(st.session_state.messages)
@@ -150,14 +159,15 @@ with st.sidebar:
         
         
 def generate_todo():      
-    auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
+    # auto_prompt = advice_prompt
 
     # # Display the auto-prompt in chat
     # with st.chat_message("user"):
     #     st.markdown(auto_prompt)
 
     # Add auto-prompt to message history
-    st.session_state.messages.append({"role": "user", "content": auto_prompt})
+    # st.session_state.messages.append({"role": "user", "content": user_input})
+    st.session_state.messages.append( {"role": "assistant", "content": advice_prompt})
 
     # Generate GPT response for auto-prompt
     gpt_response = generate_gpt_response(st.session_state.messages)
