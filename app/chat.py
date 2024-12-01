@@ -6,11 +6,12 @@
 import openai
 import streamlit as st
 from datetime import datetime
+from prompt import REFLECTION_MEMORY
 
 st.set_option("client.showSidebarNavigation", False)
 
 # Set the model and API
-st.title("Find Your Calm, One Day at a Time")
+st.title("Share your emotion with me")
 
 
 def menu():
@@ -31,7 +32,7 @@ if "openai_model" not in st.session_state:
 if "messages" not in st.session_state:
     # Implicit system prompt guiding GPT on tone and response style
     st.session_state.messages = [
-        {"role": "system", "content": "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."}
+        {"role": "system", "content": REFLECTION_MEMORY}
     ]
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
@@ -83,7 +84,7 @@ if st.button("Submit"):
 
 # Greetings
 with st.chat_message("assistant"):
-    st.write("It's nice to see you here! How's your day going?")
+    st.write("Welcome to your mental health assistant! Share your thoughts, and I'll provide reflections and advice.")
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
