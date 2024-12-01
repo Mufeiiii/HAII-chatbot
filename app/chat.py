@@ -84,7 +84,7 @@ if st.button("Submit"):
 
 # Greetings
 with st.chat_message("assistant"):
-    st.write("Welcome to your mental health assistant! Share your thoughts, and I'll provide reflections and advice.")
+    st.write("How are you feeling today, is there anything that I can help you with?")
 
 # Display chat messages from history on app rerun
 for message in st.session_state.messages:
