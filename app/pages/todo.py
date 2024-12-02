@@ -3,6 +3,7 @@ import openai
 from datetime import datetime
 from prompt import CBPT_MEMORY
 from prompt import advice_prompt
+# from prompt import summary_prompt
 
 # if "to_do" in st.session_state:
 #     st.write(st.session_state.to_do)
@@ -10,13 +11,11 @@ from prompt import advice_prompt
 # Initialize chat history and implicit system prompt
 if "messages" not in st.session_state:
     # Implicit system prompt guiding GPT on tone and response style
-    st.session_state.messages = [
-        {"role": "system", "content": "You are a supportive and empathetic assistant that helps users reflect on their emotions. Provide thoughtful, gentle, and positive responses that encourage self-reflection and emotional well-being."}
-    ]
+    st.session_state.messages = []
 
-st.session_state.messages = [
+st.session_state.messages.append (
     {"role": "system", "content":  CBPT_MEMORY}
-]
+)
 
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
@@ -29,15 +28,17 @@ def button_op():
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
             chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
-            summary_prompt = f"Summarize the users' events and feelings in few sentences to capture key emotions and themes:\n\n{chat_history}"
+            summary_prompt = f"Summarize the users' events and feelings in in no more than three sentences to capture key emotions and themes:\n\n{chat_history}"
+            # summary_prompt = f"Based on our chat history, summarize my events and feelings in in no more than three sentences to capture key emotions and themes(please DON't include any suggestions or advice you give me)"
             
             # Call OpenAI API to get the summary
             try:
                 response = openai.chat.completions.create(
                     model=st.session_state["openai_model"],
                     messages=[
-                        {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection."},
+                        {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection. "},
                         {"role": "user", "content": summary_prompt}
+                        # {"role": "assistant", "content": summary_prompt}
                     ]
                 )
                 summary = response.choices[0].message.content
@@ -155,18 +156,20 @@ with st.sidebar:
         
         
 def generate_todo():      
-    auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
+    # auto_prompt = "Can you help me generate a to-do list for targeting this issue?"
 
     # # Display the auto-prompt in chat
     # with st.chat_message("user"):
     #     st.markdown(auto_prompt)
 
     # Add auto-prompt to message history
-    st.session_state.messages.append({"role": "user", "content": auto_prompt})
+    # st.session_state.messages.append({"role": "user", "content": auto_prompt})
+    user_input = "Can you help me generate a to-do list for targeting this issue?"
+    st.session_state.messages.append({"role": "user", "content": user_input})
     st.session_state.messages.append( {"role": "assistant", "content": advice_prompt})
 
     # Generate GPT response for auto-prompt
-    gpt_response = generate_gpt_response(st.session_state.messages)
+    generate_gpt_response(st.session_state.messages)
     
 generate_todo()
 st.write(st.session_state.chat_summary)

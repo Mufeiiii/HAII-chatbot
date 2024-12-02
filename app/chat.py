@@ -7,6 +7,7 @@ import openai
 import streamlit as st
 from datetime import datetime
 from prompt import REFLECTION_MEMORY
+# from prompt import summary_prompt
 
 st.set_option("client.showSidebarNavigation", False)
 
@@ -148,7 +149,7 @@ def button_op():
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
             chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
-            summary_prompt = f"Summarize the users' events and feelings in few sentences to capture key emotions and themes:\n\n{chat_history}"
+            summary_prompt = f"Summarize the users' events and feelings in no more than three sentences to capture key emotions and themes:\n\n{chat_history}"
             
             # Call OpenAI API to get the summary
             try:
@@ -157,6 +158,7 @@ def button_op():
                     messages=[
                         {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection."},
                         {"role": "user", "content": summary_prompt}
+                        # {"role": "assistant", "content": summary_prompt}
                     ]
                 )
                 summary = response.choices[0].message.content
