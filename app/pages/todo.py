@@ -3,7 +3,6 @@ import openai
 from datetime import datetime
 from prompt import CBPT_MEMORY
 from prompt import advice_prompt
-# from prompt import summary_prompt
 
 # if "to_do" in st.session_state:
 #     st.write(st.session_state.to_do)
@@ -21,14 +20,18 @@ if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
 if "emoji_selections" not in st.session_state:
     st.session_state.emoji_selections = None  # Only one selection allowed
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = ""  # Only one selection allowed
+
 
     
 def button_op():
     with st.popover("End Chat"):
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
-            chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
-            summary_prompt = f"Summarize the users' events and feelings in in no more than three sentences to capture key emotions and themes:\n\n{chat_history}"
+            # chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
+            summary_prompt = f"Summarize the users' events and feelings in no more than 20 words to capture key emotions and themes. BE CONCISE. Start every sentence with \"You\". DO NOT include any suggestions. Here is the chat history you want to summarize: \n\n{st.session_state.chat_history}."
+            
             # summary_prompt = f"Based on our chat history, summarize my events and feelings in in no more than three sentences to capture key emotions and themes(please DON't include any suggestions or advice you give me)"
             
             # Call OpenAI API to get the summary
@@ -36,8 +39,9 @@ def button_op():
                 response = openai.chat.completions.create(
                     model=st.session_state["openai_model"],
                     messages=[
-                        {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection. "},
-                        {"role": "user", "content": summary_prompt}
+                        # {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection. "},
+                        # {"role": "user", "content": summary_prompt}
+                        {"role": "assistant", "content": summary_prompt}
                         # {"role": "assistant", "content": summary_prompt}
                     ]
                 )

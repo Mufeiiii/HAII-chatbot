@@ -7,7 +7,7 @@ import openai
 import streamlit as st
 from datetime import datetime
 from prompt import REFLECTION_MEMORY
-# from prompt import summary_prompt
+from prompt import summary_prompt
 
 st.set_option("client.showSidebarNavigation", False)
 
@@ -37,6 +37,8 @@ if "messages" not in st.session_state:
     ]
 if "chat_summary" not in st.session_state:
     st.session_state.chat_summary = []
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = ""
 
 # Emoji selection
 st.write("How are you feeling right now? Select an emoji that resonates with your mood:")
@@ -149,15 +151,16 @@ def button_op():
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
             chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
-            summary_prompt = f"Summarize the users' events and feelings in no more than three sentences to capture key emotions and themes:\n\n{chat_history}"
+            summary_prompt = f"Summarize the users' events and feelings in no more than 20 words to capture key emotions and themes. BE CONCISE. Start every sentence with \"You\". Here is the chat history you want to summarize: \n\n{chat_history}."
             
             # Call OpenAI API to get the summary
             try:
                 response = openai.chat.completions.create(
                     model=st.session_state["openai_model"],
                     messages=[
-                        {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection."},
-                        {"role": "user", "content": summary_prompt}
+                        # {"role": "system", "content": "You are an assistant summarizing a chat for emotional reflection."},
+                        {"role": "assistant", "content": summary_prompt}
+                        # {"role": "user", "content": summary_prompt}
                         # {"role": "assistant", "content": summary_prompt}
                     ]
                 )
@@ -191,9 +194,9 @@ with st.sidebar:
     st.markdown("### Quick Tools")
     st.write("If you want to generate the a potential to-do list, please press this button.")
     if st.button("Generate To-do"):
+        st.session_state.chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
         st.switch_page("pages/todo.py")
         
     button_op()
 
 st.write(st.session_state.chat_summary)
-            
