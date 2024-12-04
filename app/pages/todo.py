@@ -26,6 +26,7 @@ if "chat_history" not in st.session_state:
 
     
 def button_op():
+    st.write("If you want to end or discard chat, please press the end-chat button.")
     with st.popover("End Chat"):
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
@@ -176,5 +177,5 @@ def generate_todo():
     generate_gpt_response(st.session_state.messages)
     
 generate_todo()
-st.write(st.session_state.chat_summary)
+# st.write(st.session_state.chat_summary)
 # st.write(st.session_state.to_do)

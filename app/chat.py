@@ -147,6 +147,7 @@ if prompt := st.chat_input("How's your day?"):
     generate_gpt_response(st.session_state.messages)
 
 def button_op():
+    st.write("If you want to end or discard chat, please press the end-chat button.")
     with st.popover("End Chat"):
         if st.button("Save in Calendar"):
             # Generate a summary of the chat using GPT
@@ -188,6 +189,10 @@ def button_op():
             st.session_state.messages = []  # Clear chat history
             st.rerun()
 
+    st.write(" \n \n ")
+    st.write(" How this app work: \n ")
+    st.write(" This app is grounded in Cognitive Behavioral Therapy (CBT), a trusted, evidence-based approach widely endorsed by mental health professionals. By addressing the connection between thoughts, emotions, and behaviors, it helps you challenge negative patterns and adopt healthier alternatives. Our curated to-do suggestions draw from proven CBT protocols for effective, research-backed solutions.")
+
 
 # Add the "Generate To-do" button in the sidebar
 with st.sidebar:
@@ -196,7 +201,7 @@ with st.sidebar:
     if st.button("Generate To-do"):
         st.session_state.chat_history = "\n".join([f"{msg['role'].capitalize()}: {msg['content']}" for msg in st.session_state.messages if msg['role'] != "system"])
         st.switch_page("pages/todo.py")
-        
+    
     button_op()
 
-st.write(st.session_state.chat_summary)
+# st.write(st.session_state.chat_summary)
